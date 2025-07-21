@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Panel Rows</title>
+  <link rel="stylesheet" href="dashboard.css" />
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+</head>
+<body>
+<div id="pannels">
+  <div id="left">
+    <div id="nameLogOutBox" class="panel-box">
+      <span id="userName">Name</span><br>
+      <span id="userEmail">Email</span>
+      <button id="logoutBtn">Logout</button>
+    </div>
+    <div id="calenderBox" class="panel-box">Calendar</div>
+  </div>
+
+  <div id="middle">
+    <div id="leadsBox" class="panel-box">Leads</div>
+  </div>
+
+  <div id="right">
+    <div id="callLogBox" class="panel-box">Call Log</div>
+    <div id="scheduleCallBox" class="panel-box">Schedule Call</div>
+  </div>
+</div>
+
+<p id="errorMsg" style="color:red;"></p>
+<p style="display:none;" id="userId"></p>
+
+<script src="dashboard.js"></script>
+</body>
+</html>

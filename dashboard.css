@@ -1,0 +1,61 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: system-ui, sans-serif;
+  background-color: #f9fafb;
+  padding: 20px;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Panel Layout: Three vertical columns side-by-side */
+#pannels {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+  flex: 1;
+}
+
+/* Each column takes up space vertically */
+#left, #middle, #right {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 33%;
+}
+
+/* Shared style for all boxes */
+.panel-box {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  text-align: left;
+  overflow-y: auto;
+}
+
+/* Specific box height control */
+#nameLogOutBox {
+  height: 200px;
+}
+
+#calenderBox {
+  height: 100%;
+}
+
+#leadsBox {
+  height: 100%;
+}
+
+#callLogBox {
+  height: 100%;
+}
+
+#scheduleCallBox {
+  height: 300px;
+}

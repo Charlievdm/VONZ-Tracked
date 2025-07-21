@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Editable Leads Viewer</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      padding: 20px;
+      gap: 20px;
+    }
+    #leadList {
+      flex: 1;
+      max-width: 500px;
+    }
+    .lead-box {
+      border: 1px solid #ccc;
+      margin-bottom: 10px;
+      border-radius: 5px;
+      padding: 10px;
+      background: #f9f9f9;
+    }
+    .lead-header {
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .lead-details {
+      margin-top: 10px;
+      display: none;
+    }
+    .lead-details input {
+      width: 95%;
+      padding: 5px;
+      margin-bottom: 10px;
+    }
+    .save-btn {
+      padding: 6px 12px;
+      border: none;
+      border-radius: 4px;
+      background-color: gray;
+      color: white;
+      cursor: not-allowed;
+    }
+    .save-btn.enabled {
+      background-color: #4CAF50;
+      cursor: pointer;
+    }
+    .unsaved-warning {
+      color: red;
+      font-size: 14px;
+      display: none;
+      margin-left: 10px;
+      flex-shrink: 0;
+    }
+    #selectedLead {
+      flex: 1;
+      font-size: 24px;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="leadList"></div>
+  <div id="selectedLead">empty</div>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDwF_v750MPgCtcNmL1fXMViEgs8kpW0Xo",
+      authDomain: "vonz-tracked.firebaseapp.com",
+      projectId: "vonz-tracked",
+      storageBucket: "vonz-tracked.firebasestorage.app",
+      messagingSenderId: "811010757660",
+      appId: "1:811010757660:web:643f8b83b9a700f009bbd9"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    const leadList = document.getElementById("leadList");
+    const selectedLeadDisplay = document.getElementById("selectedLead");
+    let currentOpen = null;
+
+    db.collection("Users")
+      .doc("kJRBIF9dvCU8AJ6dQRzQrqu4AGx1")
+      .collection("Leads")
+      .get()
+      .then((querySnapshot) => {
+        querySnapshot.forEach((doc) => {
+          const lead = doc.data();
+          const leadId = doc.id;
+
+          const box = document.createElement("div");
+          box.className = "lead-box";
+
+          const header = document.createElement("div");
+          header.className = "lead-header";
+
+          const nameLabel = document.createElement("span");
+          nameLabel.textContent = lead.name || "No Name";
+
+          const warning = document.createElement("span");
+          warning.textContent = "Changes aren't saved";
+          warning.className = "unsaved-warning";
+
+          header.appendChild(nameLabel);
+          header.appendChild(warning);
+          box.appendChild(header);
+
+          const details = document.createElement("div");
+          details.className = "lead-details";
+
+          const nameInput = document.createElement("input");
+          nameInput.value = lead.name || "";
+          nameInput.placeholder = "Name";
+
+          const dobInput = document.createElement("input");
+          dobInput.value = lead.dob || "";
+          dobInput.placeholder = "DOB";
+
+          const numberInput = document.createElement("input");
+          numberInput.value = lead.number || "";
+          numberInput.placeholder = "Number";
+
+          const saveButton = document.createElement("button");
+          saveButton.textContent = "Save";
+          saveButton.className = "save-btn";
+
+          let original = {
+            name: nameInput.value,
+            dob: dobInput.value,
+            number: numberInput.value
+          };
+
+          const checkChanges = () => {
+            const changed = (
+              nameInput.value !== original.name ||
+              dobInput.value !== original.dob ||
+              numberInput.value !== original.number
+            );
+            if (changed) {
+              saveButton.classList.add("enabled");
+              saveButton.disabled = false;
+              saveButton.style.cursor = "pointer";
+              warning.style.display = "inline";
+            } else {
+              saveButton.classList.remove("enabled");
+              saveButton.disabled = true;
+              saveButton.style.cursor = "not-allowed";
+              warning.style.display = "none";
+            }
+          };
+
+          nameInput.addEventListener("input", checkChanges);
+          dobInput.addEventListener("input", checkChanges);
+          numberInput.addEventListener("input", checkChanges);
+
+          saveButton.addEventListener("click", () => {
+            if (!saveButton.disabled) {
+              db.collection("Users")
+                .doc("kJRBIF9dvCU8AJ6dQRzQrqu4AGx1")
+                .collection("Leads")
+                .doc(leadId)
+                .update({
+                  name: nameInput.value,
+                  dob: dobInput.value,
+                  number: numberInput.value
+                })
+                .then(() => {
+                  original = {
+                    name: nameInput.value,
+                    dob: dobInput.value,
+                    number: numberInput.value
+                  };
+                  checkChanges();
+                  nameLabel.textContent = nameInput.value || "No Name";
+                  selectedLeadDisplay.textContent = nameInput.value || "No Name";
+                });
+            }
+          });
+
+          details.appendChild(nameInput);
+          details.appendChild(dobInput);
+          details.appendChild(numberInput);
+          details.appendChild(saveButton);
+
+          box.appendChild(details);
+
+          header.addEventListener("click", () => {
+            if (currentOpen && currentOpen !== details) {
+              currentOpen.style.display = "none";
+            }
+
+            const isOpen = details.style.display === "block";
+            if (isOpen) {
+              details.style.display = "none";
+              selectedLeadDisplay.textContent = "empty";
+              currentOpen = null;
+            } else {
+              details.style.display = "block";
+              selectedLeadDisplay.textContent = nameInput.value || "No Name";
+              currentOpen = details;
+            }
+          });
+
+          leadList.appendChild(box);
+        });
+      })
+      .catch((error) => {
+        console.error("Error getting leads: ", error);
+      });
+  </script>
+
+</body>
+</html>
